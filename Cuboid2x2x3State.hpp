@@ -42,6 +42,12 @@ public:
         // if moves have been done check the last move
         if(! moves.empty()){
             auto lastMove = moves[moves.size()-1];
+            if (lastMove != Cuboid2x2x3Move::F2) {
+                possibleMoves.push_back(Cuboid2x2x3Move::F2);
+            }
+            if (lastMove != Cuboid2x2x3Move::R2) {
+                possibleMoves.push_back(Cuboid2x2x3Move::R2);
+            }
             if (lastMove != Cuboid2x2x3Move::U && lastMove != Cuboid2x2x3Move::U2 && lastMove != Cuboid2x2x3Move::U3) {
                 possibleMoves.push_back(Cuboid2x2x3Move::U);
                 possibleMoves.push_back(Cuboid2x2x3Move::U2);
@@ -52,16 +58,10 @@ public:
                 possibleMoves.push_back(Cuboid2x2x3Move::D2);
                 possibleMoves.push_back(Cuboid2x2x3Move::D3);
             }
-            if (lastMove != Cuboid2x2x3Move::F2) {
-                possibleMoves.push_back(Cuboid2x2x3Move::F2);
-            }
-            if (lastMove != Cuboid2x2x3Move::R2) {
-                possibleMoves.push_back(Cuboid2x2x3Move::R2);
-            }
         } else {
-            possibleMoves = {Cuboid2x2x3Move::U, Cuboid2x2x3Move::U2, Cuboid2x2x3Move::U3,
-                            Cuboid2x2x3Move::D, Cuboid2x2x3Move::D2, Cuboid2x2x3Move::D3,
-                            Cuboid2x2x3Move::F2, Cuboid2x2x3Move::R2};
+            possibleMoves = {Cuboid2x2x3Move::F2, Cuboid2x2x3Move::R2,
+                            Cuboid2x2x3Move::U, Cuboid2x2x3Move::U2, Cuboid2x2x3Move::U3,
+                            Cuboid2x2x3Move::D, Cuboid2x2x3Move::D2, Cuboid2x2x3Move::D3};
         }
 
         return possibleMoves;
@@ -74,31 +74,31 @@ public:
         switch (move) {
             case Cuboid2x2x3Move::U:
                 std::swap(newState[0], newState[1]);  // Example move
-                std::swap(newState[0], newState[2]);
                 std::swap(newState[0], newState[3]);
+                std::swap(newState[0], newState[2]);
                 break;
             case Cuboid2x2x3Move::U2:
-                std::swap(newState[0], newState[2]);
-                std::swap(newState[1], newState[3]);
+                std::swap(newState[0], newState[3]);
+                std::swap(newState[1], newState[2]);
                 break;
             case Cuboid2x2x3Move::U3:
-                std::swap(newState[0], newState[3]);
                 std::swap(newState[0], newState[2]);
+                std::swap(newState[0], newState[3]);
                 std::swap(newState[0], newState[1]);
                 break;
             case Cuboid2x2x3Move::D:
-                std::swap(newState[8], newState[9]);  // Example move
                 std::swap(newState[8], newState[10]);
                 std::swap(newState[8], newState[11]);
+                std::swap(newState[8], newState[9]);
                 break;
             case Cuboid2x2x3Move::D2:
-                std::swap(newState[8], newState[10]);
-                std::swap(newState[9], newState[11]);
+                std::swap(newState[8], newState[11]);
+                std::swap(newState[9], newState[10]);
                 break;
             case Cuboid2x2x3Move::D3:
+                std::swap(newState[8], newState[9]);
                 std::swap(newState[8], newState[11]);
                 std::swap(newState[8], newState[10]);
-                std::swap(newState[8], newState[9]);
                 break;
             case Cuboid2x2x3Move::F2:
                 std::swap(newState[2], newState[11]);
@@ -124,7 +124,7 @@ public:
     int heuristic(const PuzzleState<Cuboid2x2x3Move>& goal) const override {
         // Cast goal to Cuboid2x2x3State and calculate heuristic
         const Cuboid2x2x3State& goalState = dynamic_cast<const Cuboid2x2x3State&>(goal);
-        int h = 0;
+        int h = std::max(centerHeuristic(), cornerHeuristic());
         // TODO: add heuristic (or don't)
         return h;
     }
@@ -135,10 +135,11 @@ public:
     }
 
     void printState() const override {
+        std::cout << "-----\n";
         for (int i = 0; i < state.size(); i++) {
             std::cout << state[i] << " ";
             if(i%2 == 1) {std::cout << std::endl;}
-            if(i%4 == 3)  {std::cout << "-----";}
+            if(i%4 == 3)  {std::cout << "-----\n";}
         }
         std::cout << "\n";
     }
@@ -162,6 +163,24 @@ public:
         } else {
             throw std::invalid_argument("Invalid move provided to moveToString function");
         }
+    }
+
+    int centerHeuristic() const {
+        int h = 0;
+        for (int i = 4; i < 8; i++){
+            if(i != state[i]) h++;
+        }
+        return h/2;
+    }
+
+    int cornerHeuristic() const {
+        int h = 0;
+        for(int i = 0; i < state.size(); i++){
+            //skip the centers
+            if (i > 3 && i < 8) continue;
+            if (i != state[i]) h++;
+        }
+        return h/4;
     }
 };
 
