@@ -1,0 +1,7 @@
+  Corner positions        orientations
+          L   1    U                    7
+            /   \                    6     8
+          0       2               5          9
+        H  \     /  R              14       10
+            4 _ 3                   13 12 11
+              D

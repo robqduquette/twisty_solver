@@ -43,7 +43,7 @@ public:
         std::cout << "\n";
     }
 
-protected:
+// protected:
     // Convert a move to a string (to be implemented by derived classes)
     virtual std::string move2str(MoveType move) const = 0;
 };
